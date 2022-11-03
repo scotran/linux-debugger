@@ -11,8 +11,8 @@ class Debugger
 {
 public:
   Debugger(std::string prog_name, pid_t pid)
-    : prog_name_(std::move(prog_name))
-    , pid_(pid)
+    : prog_name_{std::move(prog_name)}
+    , pid_{pid}
   {
   }
 
