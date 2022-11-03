@@ -28,6 +28,9 @@ private:
 auto
 Breakpoint::enable()
 {
+  if (enabled_)
+    return;
+
   auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, 0);
   saved_data_ = static_cast<uint8_t>(data & 0xff); // save bottom byte
   uint64_t int3 = 0xcc;
@@ -41,6 +44,9 @@ Breakpoint::enable()
 auto
 Breakpoint::disable()
 {
+  if (!enabled_)
+    return;
+
   auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, 0);
   auto restored_data = ((data & ~0xff) | saved_data_);
   ptrace(PTRACE_POKEDATA, pid_, addr_, restored_data);
