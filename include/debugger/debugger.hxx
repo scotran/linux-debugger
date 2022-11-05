@@ -35,7 +35,10 @@ private:
 auto
 Debugger::continue_execution() const
 {
-  ptrace(PTRACE_CONT, pid_, 0, 0);
+  if (ptrace(PTRACE_CONT, pid_, 0, 0) < 0) {
+    std::cerr << "Error while trying to continue program." << std::endl;
+    return;
+  }
 
   int wait_status;
   waitpid(pid_, &wait_status, 0);
@@ -44,12 +47,20 @@ Debugger::continue_execution() const
 auto
 Debugger::set_breakpoint_at_address(std::intptr_t addr)
 {
-  std::cout << "Set breakpoint at address 0x" << std::hex << addr << std::endl;
+  auto success = false;
   if (auto it = breakpoints_.find(addr); it != breakpoints_.end()) {
-    it->second.enable();
+    success = it->second.enable();
   } else {
     breakpoints_.try_emplace(addr, pid_, addr);
-    breakpoints_[addr].enable();
+    success = breakpoints_[addr].enable();
+  }
+
+  if (success) {
+    std::cout << "Set breakpoint at address 0x" << std::hex << addr
+              << std::endl;
+  } else {
+    std::cerr << "Unable to set breakpoint at address 0x" << std::hex << addr
+              << std::endl;
   }
 }
 

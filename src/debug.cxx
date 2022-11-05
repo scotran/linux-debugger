@@ -1,10 +1,13 @@
 #include "debugger/debugger.hxx"
 
+#include <sys/ptrace.h>
+#include <unistd.h>
+
 auto
 main(int argc, char** argv) -> int
 {
   if (argc < 2) {
-    std::cerr << "Program name not specified";
+    std::cerr << "Error: Program name not specified." << std::endl;
     return -1;
   }
 
@@ -12,11 +15,22 @@ main(int argc, char** argv) -> int
 
   auto pid = fork();
 
+  if (pid == -1) {
+    std::cerr << "Error: Unable to create new process for debugging."
+              << std::endl;
+    return -1;
+  }
+
   if (pid == 0) {
     // In child process, execute debugee
-    ptrace(PTRACE_TRACEME, 0, 0, 0);
-    execl(prog, prog, nullptr);
+    if (ptrace(PTRACE_TRACEME, 0, 0, 0) < 0) {
+      std::cerr << "Error: Unable while starting to trace program."
+                << std::endl;
+    }
 
+    execl(prog, prog, nullptr);
+    std::cerr << "Error while trying to execute program." << std::endl;
+    return -1;
   } else if (pid >= 1) {
     // In parent process, execute debugger
     std::cout << "Started debugging process " << pid << std::endl;
