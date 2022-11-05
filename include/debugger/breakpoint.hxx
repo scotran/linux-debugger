@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <errno.h>
 #include <sys/ptrace.h>
 #include <unistd.h>
-#include <errno.h>
 
 class Breakpoint
 {

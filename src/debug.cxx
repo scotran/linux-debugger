@@ -1,5 +1,6 @@
 #include "debugger/debugger.hxx"
 
+#include <sys/personality.h>
 #include <sys/ptrace.h>
 #include <unistd.h>
 
@@ -23,6 +24,7 @@ main(int argc, char** argv) -> int
 
   if (pid == 0) {
     // In child process, execute debugee
+    personality(ADDR_NO_RANDOMIZE);
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) < 0) {
       std::cerr << "Error: Unable while starting to trace program."
                 << std::endl;

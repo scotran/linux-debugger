@@ -1,16 +1,16 @@
 #pragma once
 
 #include "breakpoint.hxx"
-#include "utils.hxx"
 #include "linenoise.h"
+#include "utils.hxx"
 
 #include <iostream>
 #include <stddef.h>
 #include <string>
 #include <sys/ptrace.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <unordered_map>
-#include <sys/wait.h>
 
 class Debugger
 {
