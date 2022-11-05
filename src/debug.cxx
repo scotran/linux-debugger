@@ -1,4 +1,4 @@
-#include "debugger.hxx"
+#include "debugger/debugger.hxx"
 
 auto
 main(int argc, char** argv) -> int
@@ -14,7 +14,7 @@ main(int argc, char** argv) -> int
 
   if (pid == 0) {
     // In child process, execute debugee
-    ptrace(PTRACE_TRACEME, 0, 0, 0); // NOLINT
+    ptrace(PTRACE_TRACEME, 0, 0, 0);
     execl(prog, prog, nullptr);
 
   } else if (pid >= 1) {

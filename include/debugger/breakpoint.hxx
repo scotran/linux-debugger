@@ -1,11 +1,18 @@
 #pragma once
 
 #include <cstdint>
+#include <sys/ptrace.h>
 #include <unistd.h>
 
 class Breakpoint
 {
 public:
+  Breakpoint()
+    : pid_{}
+    , addr_{}
+  {
+  }
+
   Breakpoint(pid_t pid, std::intptr_t addr)
     : pid_{ pid }
     , addr_{ addr }

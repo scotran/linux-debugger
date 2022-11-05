@@ -1,11 +1,16 @@
 #pragma once
 
-#include "linenoise.h"
+#include "breakpoint.hxx"
 #include "utils.hxx"
+#include "linenoise.h"
 
 #include <iostream>
+#include <stddef.h>
 #include <string>
+#include <sys/ptrace.h>
 #include <unistd.h>
+#include <unordered_map>
+#include <sys/wait.h>
 
 class Debugger
 {
@@ -16,10 +21,10 @@ public:
   {
   }
 
-  auto run() const;
-  auto handle_command(const std::string& line) const;
   auto continue_execution() const;
-  auto set_breakpoint_at_address();
+  auto set_breakpoint_at_address(std::intptr_t addr);
+  auto run();
+  auto handle_command(const std::string& line);
 
 private:
   const std::string prog_name_;
@@ -37,7 +42,19 @@ Debugger::continue_execution() const
 }
 
 auto
-Debugger::handle_command(const std::string& line) const
+Debugger::set_breakpoint_at_address(std::intptr_t addr)
+{
+  std::cout << "Set breakpoint at address 0x" << std::hex << addr << std::endl;
+  if (auto it = breakpoints_.find(addr); it != breakpoints_.end()) {
+    it->second.enable();
+  } else {
+    breakpoints_.try_emplace(addr, pid_, addr);
+    breakpoints_[addr].enable();
+  }
+}
+
+auto
+Debugger::handle_command(const std::string& line)
 {
   auto args = split(line, " ");
   auto command = args[0];
@@ -53,7 +70,7 @@ Debugger::handle_command(const std::string& line) const
 }
 
 auto
-Debugger::run() const
+Debugger::run()
 {
   int wait_status;
   waitpid(pid_, &wait_status, 0);
@@ -63,17 +80,5 @@ Debugger::run() const
     handle_command(line);
     linenoiseHistoryAdd(line);
     linenoiseFree(line);
-  }
-}
-
-auto
-Debugger::set_breakpoint_at_address(std::intptr addr)
-{
-  std::cout << "Set breakpoint at address 0x" << std::hex << addr << std::endl;
-  if (auto it = breakpoints_.find(addr); it != breakpoints_.end()) {
-    it->second.enable();
-  } else {
-    breakpoints_.try_emplace(addr, pid_, addr);
-    breakpoints_[addr].enable();
   }
 }

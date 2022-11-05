@@ -22,7 +22,7 @@ split(const std::string& s, const std::string& delimiter)
   while (end != std::string::npos) {
     res.push_back(s.substr(start, end - start));
     start = end + delimiter.length();
-    end = s.find(delim, start);
+    end = s.find(delimiter, start);
   }
 
   return res;
